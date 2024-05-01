@@ -1,7 +1,8 @@
 "use client"
 import { SubmitButton } from "../submit-button"
-import { LogSignUp, SignIn } from "../HandleLogin"
+import { LogSignUp, SignIn} from "../HandleLogin"
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 export default function userLogin({
     searchParams,
 }: {
@@ -11,6 +12,9 @@ export default function userLogin({
         email: "",
         password: "",
     });
+    const router = useRouter();
+
+    const [message, setMessage] = useState<string>(searchParams?.message || "");
 
     const handleLogFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setLogFields({
@@ -18,20 +22,28 @@ export default function userLogin({
             [e.target.name]: e.target.value,
         });
     }
-
-    const [message, setMessage] = useState(searchParams?.message || "");
-
-    useEffect(() => {
-
-        const timer = setTimeout(() => {
-            setMessage("");
-        }, 2500); // 2500 milisegundos = 2,5 segundos
-
-        return () => clearTimeout(timer);
-    }, [searchParams.message]);
-    // maneja la cantidad de tiempo que el mensaje de error se muestra en pantalla si el login no es validado
+ 
 
     const areFieldsNotEmpty = logFields.email !== "" && logFields.password !== ""; //verifica que los inputs no esten vacios
+
+    const HandleSignIn = async (formData: FormData) => {
+        await SignIn(formData);
+        if(searchParams?.message !== null){
+            setMessage(searchParams?.message);
+           
+        }
+       
+    }
+    
+    useEffect(() => {
+        if(message !== ""){
+            const timer = setTimeout(() => {
+                setMessage(""); // Limpia el mensaje después de unos instantes
+            }, 2000); // Tiempo que aparece el mensaje en mmilisegundos
+            return () => clearTimeout(timer); // Limpia el temporizador al desmontar el componente
+        }
+    }, [HandleSignIn]);
+    
 
     return (
         <div>
@@ -42,7 +54,7 @@ export default function userLogin({
                 <label htmlFor="password" className="text-md">Contraseña</label>
                 <input type="password" className="" name="password" placeholder="••••••••" value={logFields.password} onChange={handleLogFieldChange} />
                 <SubmitButton
-                    formAction={SignIn}
+                    formAction={HandleSignIn}
                     className=""
                     pendingText="Signing In..."
                     disabled={!areFieldsNotEmpty} //desabilita el boton si los campos estan vacios
@@ -56,11 +68,12 @@ export default function userLogin({
                 >
                     Registrarse
                 </SubmitButton>
-                {message !== "" ? (
+                {message !== "" && (
+                    
                     <p className="mt-4 p-4 bg-foreground/10 text-foreground text-center">
                         {message}
                     </p>
-                ) : null}
+                )}
             </form>
 
 
