@@ -2,7 +2,6 @@
 import { SubmitButton } from "../submit-button"
 import { LogSignUp, SignIn} from "../HandleLogin"
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 export default function userLogin({
     searchParams,
 }: {
@@ -12,7 +11,6 @@ export default function userLogin({
         email: "",
         password: "",
     });
-    const router = useRouter();
 
     const [message, setMessage] = useState<string>(searchParams?.message || "");
 
